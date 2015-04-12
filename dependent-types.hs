@@ -3,12 +3,16 @@
  -- https://www.fpcomplete.com/user/konn/prove-your-haskell-for-great-safety/dependent-types-in-haskell
 -}
 
-{-# LANGUGE DataKinds, TypeFamilies #-}
+{-# LANGUAGE DataKinds, TypeFamilies, TypeOperators, GADTs, ExistentialQuantification #-}
 data Nat = Z | S Nat
 
-type family Plus (n :: Nat) (m :: Nat) :: Nat
-type instance Plus Z       m = m
-type instance Plus Z (S n) m = S (Plus n m)
+infixl 6 :+
 
+type family   (n :: Nat) :+ (m :: Nat) :: Nat
+type instance Z     :+ m = m
+type instance (S n) :+ m = S (n :+ m)
 
-
+data Vector a m
+  = (m ~ Z)   => Nil
+  | forall n. (m ~ S n) => (:-) a (Vector a n)
+infixr 5 :-
